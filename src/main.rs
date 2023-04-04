@@ -64,6 +64,7 @@ fn main() -> io::Result<()>{
     }
     else if query.eq(&String::from("pomo")) {
         let mut duration = String::new();
+        println!("Enter how how long the timer should last");
         io::stdin().read_line(&mut duration).expect("Failed to read line");
         let duration: i32 = duration.trim().parse().expect("Please Type a number");
         let mut timer = Timer::new(duration);
