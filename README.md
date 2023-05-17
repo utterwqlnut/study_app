@@ -1,5 +1,4 @@
 # study_app v1
-study_app
 
 > Study app includes pomodoro timer and weekly progress chart
 
