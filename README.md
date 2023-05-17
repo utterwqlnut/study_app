@@ -1,4 +1,4 @@
-# study_app
+# study_app v1
 study_app
 
 > Study app includes pomodoro timer and weekly progress chart
@@ -15,11 +15,4 @@ cargo run -- pomo
 - To use do
 ```bash
 cargo run -- graph
-```
-
-## reset
-- You must use the reset command if you took a break from the app for more than a week and plan on using it.
-- To use do
-```bash
-cargo run -- reset
 ```
