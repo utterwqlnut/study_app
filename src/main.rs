@@ -4,13 +4,14 @@ use crate::graph::bar;
 use std::fs::File;
 use std::io::{self,prelude::*,BufReader};
 use chrono::Datelike;
+use chrono::Utc;
 pub mod graph;
 pub mod pomo;
 fn main() -> io::Result<()>{
     let args: Vec<String> = env::args().collect();
     let query = &args[1];
     
-    //A lot of reading in of files
+    //Reads in days values
     let file = File::open("days.txt")?;
     let reader = BufReader::new(&file);
     let mut days: Vec<i32> = Vec::new();
@@ -18,15 +19,21 @@ fn main() -> io::Result<()>{
         let value:i32 = line?.trim().parse().expect("Please enter a number");
         days.push(value);
     }
+    
+    //reads in last_seen file 
     let mut file = File::create("days.txt")?;
 
     let last_seen_file = File::open("last_seen.txt")?;
     let mut last_seen_reader = BufReader::new(&last_seen_file);
     let mut last_val = String::new();
+    let mut last_days_from_ce = String::new();
+    let day_val: usize;
 
     last_seen_reader.read_line(&mut last_val).expect("Issue reading");
-    let last_val: usize = last_val.trim().parse().expect("Please enter a number");
-    let day_val: usize;
+    let last_day_val: usize = last_val.trim().parse().expect("Issue parsing");
+    last_seen_reader.read_line(&mut last_days_from_ce).expect("Issue reading");
+    let last_days_from_ce_val: i32 = last_days_from_ce.trim().parse().expect("issue parsing");
+
     //converting weekday to number
     let weekday = chrono::offset::Local::now().date_naive().weekday();
     match weekday {
@@ -38,14 +45,23 @@ fn main() -> io::Result<()>{
         chrono::Weekday::Sat => day_val=5,
         chrono::Weekday::Sun => day_val=6,
     }
+
+    let num_days_from_ce_val: i32 = Utc::now().num_days_from_ce();
+    
     //resetting days to 0 if needed
-    if day_val != last_val {
-        if day_val < last_val {
+    //Checks if its been a week since program was last run
+    if num_days_from_ce_val - last_days_from_ce_val >= 7 {
+        for i in 0..7 {
+            days[i]=0;
+        }
+    }
+    else if day_val != last_day_val {
+        if day_val < last_day_val {
             for i in 0..7 {
                 days[i]=0;
             }
         } else {
-            for i in last_val..=day_val { 
+            for i in last_day_val..=day_val { 
                 days[i]=0;
             }
         }   
@@ -53,8 +69,13 @@ fn main() -> io::Result<()>{
 
     //updates to last_seen.txt
     let mut last_seen_file = File::create("last_seen.txt")?;
-    let mut string = String::new();
-    last_seen_file.write_all(&day_val.to_string().as_bytes())?;
+    let mut result1 = String::new();
+    let mut result2 = String::new();
+    result2+=&day_val.to_string();
+    result2+="\n";
+    result2+=&num_days_from_ce_val.to_string();
+
+    last_seen_file.write_all(result2.as_bytes())?;
 
     //handles each query
     if query.eq(&String::from("reset")) {
@@ -80,9 +101,9 @@ fn main() -> io::Result<()>{
     }
     //updates days.txt
     for day in &days {
-        string+=&(day.to_string()+"\n");
+        result1+=&(day.to_string()+"\n");
     }
 
-    file.write_all(&string.as_bytes())?;
+    file.write_all(&result1.as_bytes())?;
     Ok(())
 }
