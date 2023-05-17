@@ -8,6 +8,7 @@
 ```bash
 cargo run -- pomo
 ```
+- If you ever want to end the timer early press control q'
 
 ## graph mode
 - Graph mode displays a scaled bar chart to show how much u studied during the week.
